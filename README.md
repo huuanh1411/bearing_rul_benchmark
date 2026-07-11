@@ -1,0 +1,112 @@
+# Bearing RUL Benchmarks
+
+Python benchmarks for rolling-bearing Remaining Useful Life prediction using deep learning baselines derived from the Firefly-Optimized CNN-LSTM study.
+
+## Implemented models
+
+- CNN regressor
+- LSTM regressor
+- CNN-LSTM regressor
+- Firefly-optimized CNN-LSTM search
+
+## Expected dataset format
+
+Provide a CSV file with at least these columns:
+
+- `bearing_id`: degradation-run or bearing identifier
+- `time_idx`: monotonic step index inside each run
+- `rul`: remaining useful life target for each step
+- one or more feature columns such as `vibration_x`, `vibration_y`, `temperature`
+
+The benchmark pipeline splits data by `bearing_id`, fits Min-Max scaling on the training split only, generates fixed-size sliding windows, trains each baseline, and writes JSON results.
+
+## Quick start
+
+```bash
+pip install -r requirements.txt
+python -m bearing_rul_benchmarks benchmark \
+  --data data/bearing.csv \
+  --id-column bearing_id \
+  --time-column time_idx \
+  --target-column rul \
+  --feature-columns vibration_x vibration_y temperature \
+  --window-size 64 \
+  --output results.json \
+  --include-firefly
+```
+
+## Preparing raw log files
+
+If your dataset is a folder of raw CSV log files rather than one merged benchmark table, convert it first:
+
+```bash
+python -m bearing_rul_benchmarks prepare-logs \
+  --input-dir data \
+  --output data/prepared_benchmark.csv
+```
+
+For very large raw logs, start with a smaller prepared dataset:
+
+```bash
+python -m bearing_rul_benchmarks prepare-logs \
+  --input-dir data \
+  --output data/prepared_small.csv \
+  --max-files 5 \
+  --row-step 100 \
+  --chunk-size 250000
+```
+
+This command treats each CSV file as one independent run and writes a merged dataset with these columns:
+
+- `bearing_id`: file name without `.csv`
+- `time_idx`: row index inside each file
+- `rul`: reverse row index, counting down to zero
+- `feature_0`, `feature_1`, ...: sensor columns from the raw file
+
+If the raw files already include headers, add `--has-header`. If you know the feature names, add `--feature-columns vibration_x vibration_y temperature load`. Use `--row-step 100` to keep every 100th row and reduce CPU, RAM, disk usage, and training time.
+
+## Safer first GPU run
+
+After preparing a smaller dataset, start with a lighter benchmark command:
+
+```bash
+python -m bearing_rul_benchmarks benchmark \
+  --data data/prepared_small.csv \
+  --id-column bearing_id \
+  --time-column time_idx \
+  --target-column rul \
+  --feature-columns feature_0 feature_1 feature_2 feature_3 \
+  --window-size 64 \
+  --batch-size 16 \
+  --epochs 10 \
+  --seeds 42 \
+  --device cuda \
+  --output results.json
+```
+
+## Generating charts from results
+
+Once you have a results JSON file (from `benchmark --output results.json`), generate
+comparison charts with:
+
+```bash
+python -m bearing_rul_benchmarks plot \
+  --results results.json \
+  --output-dir plots
+```
+
+This writes:
+
+- `plots/benchmark_dashboard.png`: a combined 2x2 figure comparing RMSE, MAE, R2, and
+  training time across all models. If a `firefly_cnn_lstm` entry with a
+  `search_history` is present, its convergence curve is nested as an inset chart
+  inside the RMSE panel.
+- `plots/firefly_convergence.png`: a standalone chart of the Firefly hyperparameter
+  search, showing per-candidate validation RMSE alongside the best-so-far curve.
+  Only written when a firefly search history exists in the results file.
+
+## Notes
+
+- Use run-level splitting rather than random row splitting to avoid leakage.
+- Firefly optimization minimizes validation RMSE.
+- The code is generic and can be adapted to Jung, FEMTO-ST, or IMS after converting them into the expected tabular format.

@@ -1,0 +1,2 @@
+[console_scripts]
+bearing-rul-benchmarks = bearing_rul_benchmarks.cli:main

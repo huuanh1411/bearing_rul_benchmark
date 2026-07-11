@@ -1,0 +1,76 @@
+{
+  "data": {
+    "path": "c:\\Users\\ADMIN\\Documents\\bearing_rul_benchmarks\\data\\prepared_all_files_step1000.csv",
+    "features": [
+      "feature_0",
+      "feature_1",
+      "feature_2",
+      "feature_3"
+    ],
+    "window_size": 64
+  },
+  "benchmarks": {
+    "cnn": {
+      "rmse_mean": 510866.71875,
+      "rmse_std": 0.0,
+      "mae_mean": 426260.78125,
+      "mae_std": 0.0,
+      "r2_mean": 0.16614783867300875,
+      "r2_std": 0.0, 
+      "training_time_mean": 111.34693690000131,
+      "training_time_std": 0.0
+    },
+    "lstm": {
+      "rmse_mean": 551583.4375,
+      "rmse_std": 0.0,
+      "mae_mean": 475659.625,
+      "mae_std": 0.0,
+      "r2_mean": 0.027932981661449197,
+      "r2_std": 0.0,
+      "training_time_mean": 120.036498999998,
+      "training_time_std": 0.0
+    },
+    "cnn_lstm": {
+      "rmse_mean": 535280.3125,
+      "rmse_std": 0.0,
+      "mae_mean": 448321.0,
+      "mae_std": 0.0,
+      "r2_mean": 0.08454631928336331,
+      "r2_std": 0.0,
+      "training_time_mean": 162.52544599999965,
+      "training_time_std": 0.0
+    },
+    "firefly_cnn_lstm": {
+      "rmse_mean": 532010.625,
+      "rmse_std": 0.0,
+      "mae_mean": 447801.125,
+      "mae_std": 0.0,
+      "r2_mean": 0.09569603922599845,
+      "r2_std": 0.0,
+      "training_time_mean": 254.20640419999836,
+      "training_time_std": 0.0,
+      "best_validation_rmse": 472403.8125,
+      "best_hyperparameters": {
+        "learning_rate": 0.0001,
+        "conv_filters": 96,
+        "kernel_size": 3,
+        "lstm_hidden": 177,
+        "batch_size": 23,
+        "dropout": 0.5
+      },
+      "search_history": [
+        496996.21875,
+        481516.4375,
+        481516.4375,
+        481516.4375,
+        481516.4375,
+        480367.9375,
+        480367.9375,
+        472403.8125,
+        472403.8125,
+        472403.8125,
+        472403.8125
+      ]
+    }
+  }
+}
